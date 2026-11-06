@@ -45,7 +45,6 @@ python main.py --dry-run          # breaks after the first logged batch per epoc
 python main.py --no-accel         # force CPU
 python main.py --epochs 1 --save-model   # short run that writes mnist_cnn.pt
 python main.py --run-name baseline       # names the run folder in runs/
-CUDA_VISIBLE_DEVICES=2 python main.py    # pin to a specific GPU
 ```
 
 Overfitting demo (train on 1000 images, no learning-rate decay, many epochs):
@@ -72,7 +71,7 @@ Everything lives in `main.py`, which started as a port of the official PyTorch M
 - `log_gradient_norms()` logs the L2 norm of each parameter's gradient, plus the total, at a global batch step.
 - `log_weights()` runs once per epoch. It logs weight and gradient histograms, and the relative weight change `‖w_now − w_prev‖ / ‖w_prev‖` against a snapshot taken before the epoch.
 - `main()` parses CLI args, picks the device through `torch.accelerator` (falls back to CPU), and builds the data. The 60k MNIST training images are split 55k train / 5k validation with a fixed seed; `--train-subset N` keeps only the first N training images. The 10k test set is untouched until the end. The loop per epoch is `train` → `evaluate(val)` → log → `scheduler.step()`. The optimizer is Adadelta with a `StepLR` schedule (step size 1, gamma from `--gamma`).
-- Data is downloaded to `./data`, TensorBoard logs go to `./runs`, and the model is saved to `./mnist_cnn.pt` (not gitignored), all relative to the current working directory. Run from the repo root so they land in the expected place.
+- Data is downloaded to `./data`, TensorBoard logs go to `./runs`, and the model is saved to `./mnist_cnn.pt` (not gitignored), all relative to the current working directory. Run from the `mnist/` folder (where `main.py` lives) so they land in the expected place. The virtual environment is one level up, at the repo root (`../.venv`).
 - The train loader always shuffles. Accelerator runs also get `num_workers=1`, `persistent_workers`, and `pin_memory` on all loaders.
 
 ## Things to know
